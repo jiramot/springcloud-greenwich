@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: gateway
+  cloud:
+    consul:
+      discovery:
+        instanceId: ${spring.application.name}:${random.value}
+        healthCheckPath: /actuator/health
+        healthCheckInterval: 20s
+      host: localhost
+      port: 8500
+    gateway:
+      routes:
+      - id: hello_route
+        uri: lb://hello
+        predicates:
+          - Path=/api/v2/hello/**
+        filters:
+          - RewritePath=/api/v2/hello, /
+          - RewritePath=/api/v2/hello/(?<remaining>.*), /${remaining}
+
+#      discovery:
+#        locator:
+#          lowerCaseServiceId: true
+#          enabled: true
+
+server.port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
